@@ -14,6 +14,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // Aquí inicializamos esta clase que tiene un método para simular la carga de datos en una pantalla splash y posteriormente mostrar la pantalla principal
     TimerUtil().startTimer(context);
   }
 

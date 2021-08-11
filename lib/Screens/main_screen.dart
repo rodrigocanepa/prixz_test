@@ -24,6 +24,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
 
+  // Inicializamos nuestras variables
   Position _myCurrentLocation;
   bool _loading = true;
   bool inside = false;
@@ -40,6 +41,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // Cargamos la información inicial, la cual es obtener la ubicación del usuario
     _loadInitialData();
   }
 
@@ -374,16 +376,19 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   _loadInitialData() async {
+    // Aquí hacemos un try catch para poder detectar los permisos del usuario, esto es, porque el usuario podría rechazar los permisos y no poder continuar con el proceso
     try{
       setState(() {
         _loading = true;
       });
       _myCurrentLocation = await GetLocationUtil().determinePosition();
       fail = false;
+      // aquí leemos de la memoria local si el usuario tiene alguna ubicación almacenada, de lo contrario lo dejamos en null
       _lastLocationSaved = await SharedInfo().getLastLocationSaved();
       if(_lastLocationSaved == Position(latitude: 0.0, longitude: 0.0)){
         _lastLocationSaved = null;
       }
+      // una vez que hemos podido obtener la ubicación hacemos procedemos a refrescar el mapa y verificar los polígonos
       _reloadInfo();
     } catch(e){
       setState(() {
@@ -423,10 +428,12 @@ class _MainScreenState extends State<MainScreen> {
     setState(() {
       markers[markerId] = marker;
     });
+    // este bloque de código es para determinar si la ubicación se encuentra dentro de los polígonos a analizar.
     _checkLocationArea();
   }
 
   _checkLocationArea() async{
+    // con esta clase obtenemos la lista de los PlaceMarkModels derivados del link proporcionado y modificado de google maps para poder obtener la información de manera dinámica
     List<PlaceMarkModel> areas = await GetCoordinatesFromUrl().get();
     inside = false;
     zone = "";
@@ -439,11 +446,13 @@ class _MainScreenState extends State<MainScreen> {
       // Coordinate you want to check if it lies within or near path.
       tools.LatLng point = tools.LatLng(_myCurrentLocation.latitude, _myCurrentLocation.longitude);
 
+      // aqui verificamos si el punto a analizar se encuentra dentro de los polígonos
       if(tools.PolygonUtil.containsLocation(point, paths, true)){
         inside = true;
         zone = areas[j].name;
       }
 
+      // si no se encuentra dentro de los polígonos pero se encuentra muy cerca entonces se aplica este código
       if(!inside){
         if(tools.PolygonUtil.isLocationOnEdge(point, paths, true, tolerance: tolerance)){
           inside = true;
